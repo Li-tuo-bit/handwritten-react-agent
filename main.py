@@ -1,8 +1,10 @@
 """入口脚本：测试手写 ReAct Agent"""
 
 import os
+from dotenv import load_dotenv
 from agent import ReActAgent
 
+load_dotenv()   # ← 加载 .env
 
 def main():
     """
@@ -41,6 +43,45 @@ def main():
     agent2 = ReActAgent()
     result2 = agent2.run("贵州茅台是做什么的？")
     print(f"\n📌 最终结果: {result2}")
+
+    # ========== 测试用例 3：文件写入 ==========
+    print("\n"+"="*50)
+    print("【测试 3】文件写入")
+    print("=" * 50)
+
+    agent3 = ReActAgent()
+    result3 = agent3.run("请把 'Hello, Day 2 Agent!' 写入 ./test_output.txt 文件")
+    print(f"\n📌 最终结果: {result3}")
+
+    # ========== 测试用例 4：文件读取 ==========
+    print("\n" + "=" * 50)
+    print("【测试 4】文件读取(验证持久化记忆)")
+    print("=" * 50)
+
+    agent4 = ReActAgent()# 新实例，会自动加载 agent_memory.json
+    result4 = agent4.run("请读取 ./test_output.txt 文件的内容")
+    print(f"\n📌 最终结果: {result4}")
+
+    # ========== 测试用例 5：股票查询 ==========
+    print("\n" + "=" * 50)
+    print("【测试 5】股票查询")
+    print("=" * 50)
+    
+    agent5 = ReActAgent()
+    result5 = agent5.run("查询贵州茅台(600519)的当前股价")
+    print(f"\n📌 最终结果: {result5}")
+
+    # ========== 测试用例 6：多轮对话（验证记忆） ==========
+    print("\n" + "=" * 50)
+    print("【测试 6】多轮对话（验证记忆）")
+    print("=" * 50)
+    
+    agent6 = ReActAgent()
+    result6a = agent6.run("计算 100 + 200")
+    print(f"\n📌 第1轮结果: {result6a}")
+
+    result6b = agent6.run("刚才的那个结果是多少？再帮我乘以3")
+    print(f"\n📌 第2轮结果: {result6b}")
     
     # ========== 完成 ==========
     print("\n" + "=" * 50)
