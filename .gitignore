@@ -22,3 +22,7 @@ ENV/
 # 系统文件
 .DS_Store
 Thumbs.db
+
+# 运行时生成的文件
+agent_memory.json
+test_output.txt
