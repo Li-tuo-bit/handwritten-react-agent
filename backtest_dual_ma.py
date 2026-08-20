@@ -126,7 +126,9 @@ def run_backtest(stock_code: str ="600519",
                  start_date: str ="20230101",
                  end_date: str ="20241231",
                  initial_cash: float =100000.0,
-                 commission: float = 0.00025):
+                 commission: float = 0.00025,
+                 short_window: int = 5,      
+                 long_window: int = 20):
     """
     运行回测
     
@@ -142,7 +144,9 @@ def run_backtest(stock_code: str ="600519",
     cerebro = bt.Cerebro()
  
     # 添加策略
-    cerebro.addstrategy(DualMaStrategy)
+    cerebro.addstrategy(DualMaStrategy, 
+                    short_window=short_window, 
+                    long_window=long_window)
 
     # 获取数据
     df = prepare_data(stock_code,start_date,end_date)

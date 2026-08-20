@@ -47,7 +47,7 @@ def compare_strategies(args: str) -> str:
         for param_str in parts[1:]:
             short,long = map(int,param_str.split(","))
             # 这里需要修改 run_backtest 支持传入参数，作为扩展任务
-            result = run_backtest(stock_code,"20230101","20241231")
+            result = run_backtest(stock_code,"20230101","20241231",short_window=short, long_window=long)
             results.append({
                 "参数": f"MA{short}/MA{long}",
                 "收益率": f"{result['total_return']:.2f}%",
