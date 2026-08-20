@@ -3,7 +3,7 @@ from data_fetcher import get_stock_kline,save_stock_data
 from indicators import add_all_indicators
 import json
 import pandas as pd
-
+from backtest_tools import run_strategy_backtest, compare_strategies
 
 
 # ========== 工具 1：计算器 ==========
@@ -139,7 +139,9 @@ TOOL_REGISTRY = {
     "write_file":write_file,
     "get_stock_data":get_stock_data,
     "analyze_stock":analyze_stock,
-}
+    "run_backtest":run_strategy_backtest,
+    "compare_strategies":compare_strategies,
+}   
 
 def get_tool_description() -> str:
     """返回工具描述，供 Agent 的 Prompt 使用"""
@@ -150,6 +152,8 @@ def get_tool_description() -> str:
 4. write_file[filepath|content] - 写入文件，如 write_file[./output.txt|Hello]
 5. get_stock_data[stock_code|start_date|end_date] - 获取股票数据+技术指标
 6. analyze_stock[stock_code] - 股票技术分析
+7. run_backtest[stock_code|start_date|end_date] - 双均线策略回测
+8. compare_strategies[stock_code|short1,long1|short2,long2] - 策略参数对比
 """
 
 

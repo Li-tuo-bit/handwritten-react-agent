@@ -37,7 +37,20 @@ def get_stock_kline(stock_code: str,period:str="daily",start_date:str=None,end_d
         print(f"📂 从本地读取: {csv_path}")
         df = pd.read_csv(csv_path)
         df["日期"] = pd.to_datetime(df["日期"])
-        return df
+
+        # ===== 按日期范围过滤=====
+        if start_date:
+             start_dt = pd.to_datetime(start_date,format="%Y%m%d")
+             df = df[df["日期"] >= start_dt]
+        if end_date:
+             end_dt = pd.to_datetime(end_date,format="%Y%m%d")
+             df = df[df["日期"] <= end_dt]
+        # 过滤后如果还有数据，直接返回
+        if len(df) > 0:
+            return df
+        else:
+            print("⚠️ 本地缓存无该日期范围数据，尝试重新获取...")
+             
     else:
         raise FileNotFoundError(
             f"本地文件不存在: {csv_path}\n"

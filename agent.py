@@ -1,6 +1,8 @@
 """手写 ReAct Agent - 使用 DeepSeek API"""
 
 import os
+from dotenv import load_dotenv  
+load_dotenv()  
 import re
 from typing import List, Dict, Optional
 from tools import TOOL_REGISTRY, get_tool_description

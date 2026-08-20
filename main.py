@@ -1,21 +1,15 @@
-"""Day 3 测试入口"""
+"""Day 4 测试入口"""
 
 from agent import ReActAgent
 
-# 测试 1：获取股票数据
-print("=== 测试 1：获取股票数据 ===")
+# 测试 1：单股回测
+print("=== 测试 1：双均线回测 ===")
 agent = ReActAgent()
-result = agent.run("获取贵州茅台(600519)从2024年1月1日至今的股价数据")
-print(f"结果:\n{result}\n")
+result = agent.run("用双均线策略回测贵州茅台(600519)从2023年到2024年的表现")
+print(result)
 
-# 测试 2：技术分析
-print("=== 测试 2：技术分析 ===")
+# 测试 2：对比不同参数
+print("\n=== 测试 2：参数对比 ===")
 agent2 = ReActAgent()
-result2 = agent2.run("分析一下贵州茅台(600519)的技术面")
-print(f"结果:\n{result2}\n")
-
-# 测试 3：多工具组合
-print("=== 测试 3：多工具组合 ===")
-agent3 = ReActAgent()
-result3 = agent3.run("获取宁德时代(300750)的数据，把分析结果写入 ./analysis_300750.txt")
-print(f"结果:\n{result3}\n")
+result2 = agent2.run("对比贵州茅台用MA5/MA20和MA10/MA60两种参数的回测结果")
+print(result2)
