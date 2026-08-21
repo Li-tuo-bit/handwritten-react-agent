@@ -28,6 +28,10 @@ def run_strategy_backtest(args: str) -> str:
             "交易次数": result['trade_count'],
         }
 
+        # 保存回测结果到文件，供报告生成器读取
+        result_path = f"./backtest_result_{stock_code}.json"
+        with open(result_path, 'w', encoding='utf-8') as f:
+            json.dump(summary, f, ensure_ascii=False, indent=2)
         return json.dumps(summary,ensure_ascii=False,indent=2)
 
     except Exception as e:

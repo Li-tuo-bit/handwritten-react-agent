@@ -10,6 +10,7 @@ from openai import OpenAI
 import json
 import time
 from datetime import datetime
+import threading
 
 
 class ReActAgent:
@@ -82,7 +83,7 @@ class ReActAgent:
 
         包含：系统指令、工具描述、规则说明、示例、历史记录、当前问题
         """
-        prompt = f"""你是一个智能助手，通过交替思考和行动来解决问题。
+        prompt = f"""你是一个智能量化助手，擅长获取数据、分析指标、执行回测。
 
 {get_tool_description()}
 
@@ -102,10 +103,11 @@ class ReActAgent:
      "finish": true,
      "answer": "最终答案（用中文）"
    }}
-3. 必须严格遵循 JSON 格式，不要输出 Markdown 代码块标记（```json），直接输出 JSON 字符串
-4. 不要输出任何 JSON 以外的内容
+3. 如果任务需要多个工具，按顺序调用，不要跳过步骤
+4. 必须严格遵循 JSON 格式，不要输出 Markdown 代码块标记（```json），直接输出 JSON 字符串
+5. 不要输出任何 JSON 以外的内容
 
-示例：
+单工具示例：
 Question: 3 + 5 * 2 等于多少？
 {{
   "thought": "这是一个数学计算，用计算器工具",
@@ -122,15 +124,46 @@ Observation: 13
   "answer": "3 + 5 * 2 = 13"
 }}
 
+多工具协作示例：
+Question: 帮我分析贵州茅台的股价
+{{
+  "thought": "需要先获取股票数据",
+  "action": "get_stock_data",
+  "action_input": "600519|20240101",
+  "finish": false
+}}
+Observation: {{"股票代码": "600519", "最新收盘价": 1700.0, "MA5": 1680.5, "MA20": 1650.3}}
+{{
+  "thought": "有了数据，进一步做技术分析",
+  "action": "analyze_stock",
+  "action_input": "600519",
+  "finish": false
+}}
+Observation: MA5 在 MA20 上方，RSI=45.2，处于中性区间
+{{
+  "thought": "已获取数据和分析，综合回答",
+  "action": "",
+  "action_input": "",
+  "finish": true,
+  "answer": "贵州茅台当前股价..."
+}}
 
 现在开始：
 Question: {question}
 """
-        # 追加历史记录（让 LLM 知道之前做过什么）
+                # 追加历史记录（让 LLM 知道之前做过什么）—— 格式必须与示例一致！
         for step in self.history:
-            prompt += f"\nThought: {step['thought']}"
-            prompt += f"\nAction: {step['action']}"
-            prompt += f"\nObservation: {step['observation']}"
+            # 从 "calculator[2+3]" 中解析出工具名和参数
+            action_str = step['action']
+            if '[' in action_str and action_str.endswith(']'):
+                action_name = action_str.split('[')[0]
+                action_input = action_str[action_str.index('[')+1:-1]
+            else:
+                action_name = action_str
+                action_input = ""
+            
+            prompt += f'\n{{"thought": "{step["thought"]}", "action": "{action_name}", "action_input": "{action_input}", "finish": false}}\n'
+            prompt += f'Observation: {step["observation"]}\n'
 
         if self.conversation_history:
             prompt += "\n\n之前的对话记录(供参考):\n"
@@ -149,7 +182,7 @@ Question: {question}
                         {"role": "system", "content": "你是遵循 ReAct 范式的智能助手。严格按照 Thought/Action/Answer 格式输出。"},
                         {"role": "user", "content": prompt},
                     ],
-                    temperature=0.3,
+                    temperature=0.1,
                     max_tokens=500,
                 )
                 return response.choices[0].message.content.strip()
@@ -226,6 +259,36 @@ Question: {question}
 
     def _fallback_parse(self, text: str) -> dict:
         """降级解析：兼容非 JSON 输出（保留 Day 1 的正则逻辑）"""
+        # 先尝试从截断的 JSON 中提取关键字段
+        try:
+            # 匹配 "action": "xxx"
+            action_match = re.search(r'"action"\s*:\s*"([^"]*)"', text)
+            action = action_match.group(1) if action_match else ""
+            
+            # 匹配 "action_input": "xxx"
+            input_match = re.search(r'"action_input"\s*:\s*"([^"]*)"', text)
+            action_input = input_match.group(1) if input_match else ""
+            
+            # 匹配 "thought": "xxx"
+            thought_match = re.search(r'"thought"\s*:\s*"([^"]*)"', text)
+            thought = thought_match.group(1) if thought_match else ""
+            
+            # 匹配 "finish": true/false
+            finish_match = re.search(r'"finish"\s*:\s*(true|false)', text, re.IGNORECASE)
+            finish = finish_match.group(1).lower() == "true" if finish_match else False
+            
+            if action or finish:
+                return {
+                    "thought": thought,
+                    "action": action,
+                    "action_input": action_input,
+                    "finish": finish,
+                    "answer": "",
+                }
+        except Exception:
+            pass
+        
+        # 如果上面失败，回退到原来的正则解析
         thought = self._extract_thought(text)
         action = self._parse_action(text)
         answer = self._check_answer(text)
@@ -286,7 +349,7 @@ Question: {question}
             if action_name in TOOL_REGISTRY:
                 print(f"🔧 Action: {action_name}[{action_input}]")
 
-                #工具调用加3次重试
+                # 工具调用（带重试）
                 observation = None
                 for retry in range(3):
                     try:
@@ -294,16 +357,24 @@ Question: {question}
                         break
                     except Exception as e:
                         if retry < 2:
-                            printf(f"工具重试 {retry+1}/3...")
+                            print(f"工具重试 {retry+1}/3...")
                             continue
                         observation = f"Error: 工具执行失败（重试3次） - {e}"
+                
                 if observation.startswith("Error:"):
-                    print(f"❌{observation}")
+                    print(f"❌ {observation[:200]}")
+                    
             elif action_name:
                 observation = f"Error: 未知工具 '{action_name}'"
+                print(f"❌ {observation}")
             else:
-                observation = f"Error: 未指定工具"
+                observation = f"Error: 未指定工具（可能是 JSON 解析失败）"
+                print(f"❌ {observation}")
 
+            # 截断过长的 Observation，防止 prompt 超限导致 LLM 输出截断
+            MAX_OBS_LEN = 800
+            if len(observation) > MAX_OBS_LEN:
+                observation = observation[:MAX_OBS_LEN] + "\n...（内容已截断）"
             print(f"📊 Observation: {observation[:150]}...")
 
             # 6. 记录历史

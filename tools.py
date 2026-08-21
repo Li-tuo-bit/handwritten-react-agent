@@ -3,6 +3,7 @@ from data_fetcher import get_stock_kline,save_stock_data
 from indicators import add_all_indicators
 import json
 import pandas as pd
+from report_generator import generate_report
 from backtest_tools import run_strategy_backtest, compare_strategies
 
 
@@ -139,6 +140,7 @@ TOOL_REGISTRY = {
     "write_file":write_file,
     "get_stock_data":get_stock_data,
     "analyze_stock":analyze_stock,
+    "generate_report":generate_report,
     "run_backtest":run_strategy_backtest,
     "compare_strategies":compare_strategies,
 }   

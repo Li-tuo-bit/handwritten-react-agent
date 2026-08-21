@@ -50,6 +50,10 @@ def get_stock_kline(stock_code: str,period:str="daily",start_date:str=None,end_d
             return df
         else:
             print("⚠️ 本地缓存无该日期范围数据，尝试重新获取...")
+             # 重新加载未过滤的原始数据
+            df = pd.read_csv(csv_path)
+            df["日期"] = pd.to_datetime(df["日期"])
+            return df
              
     else:
         raise FileNotFoundError(
@@ -86,7 +90,7 @@ def get_stock_kline(stock_code: str,period:str="daily",start_date:str=None,end_d
         "换手率": "换手率"
     }
     #df = df.rename(columns=column_map)
-    #return df
+    return df
 
 def save_stock_data(df:pd.DataFrame,stock_code:str,filepath:str=None):
     """
