@@ -5,6 +5,7 @@ import json
 import pandas as pd
 from report_generator import generate_report
 from backtest_tools import run_strategy_backtest, compare_strategies
+from rag_tool import query_research_report, search_report_chunks
 
 
 # ========== 工具 1：计算器 ==========
@@ -143,6 +144,9 @@ TOOL_REGISTRY = {
     "generate_report":generate_report,
     "run_backtest":run_strategy_backtest,
     "compare_strategies":compare_strategies,
+    "generate_report":generate_report,
+    "query_research_report":query_research_report,
+    "search_report_chunks":search_report_chunks,
 }   
 
 def get_tool_description() -> str:
@@ -156,6 +160,9 @@ def get_tool_description() -> str:
 6. analyze_stock[stock_code] - 股票技术分析
 7. run_backtest[stock_code|start_date|end_date] - 双均线策略回测
 8. compare_strategies[stock_code|short1,long1|short2,long2] - 策略参数对比
+9. generate_report[stock_code] - 生成综合分析报告
+10. query_research_report[question] - 查询研报知识库，如 query_research_report[新能源行业投资机会]
+11. search_report_chunks[query] - 检索研报原始文本块（调试用）
 """
 
 
