@@ -26,3 +26,15 @@ Thumbs.db
 # 运行时生成的文件
 agent_memory.json
 test_output.txt
+backtest_result_*.json
+trade_log_*.json
+data/000858_kline.csv
+
+# 大体积目录
+chroma_db/
+models/
+__pycache__/
+"*.json" 
+"debug_*.py" 
+"chat.py" 
+"test_langgraph_hello.py" 
