@@ -30,66 +30,32 @@ def get_stock_kline(stock_code: str,period:str="daily",start_date:str=None,end_d
     if start_date is None:
             start_date = (datetime.now() - timedelta(days=365)).strftime("%Y%m%d")
 
-    # ===== 本地数据模式（网络恢复后切回下面的 akshare）=====
+        # ===== 本地缓存优先 =====
     csv_path = f"./data/{stock_code.split('.')[0]}_kline.csv"
     
     if os.path.exists(csv_path):
         print(f"📂 从本地读取: {csv_path}")
         df = pd.read_csv(csv_path)
         df["日期"] = pd.to_datetime(df["日期"])
-
-        # ===== 按日期范围过滤=====
-        if start_date:
-             start_dt = pd.to_datetime(start_date,format="%Y%m%d")
-             df = df[df["日期"] >= start_dt]
-        if end_date:
-             end_dt = pd.to_datetime(end_date,format="%Y%m%d")
-             df = df[df["日期"] <= end_dt]
-        # 过滤后如果还有数据，直接返回
-        if len(df) > 0:
-            return df
-        else:
-            print("⚠️ 本地缓存无该日期范围数据，尝试重新获取...")
-             # 重新加载未过滤的原始数据
-            df = pd.read_csv(csv_path)
-            df["日期"] = pd.to_datetime(df["日期"])
-            return df
-             
-    else:
-        raise FileNotFoundError(
-            f"本地文件不存在: {csv_path}\n"
-            f"请先用 akshare 获取数据保存，或手动创建模拟数据文件。"
-        )
-
-    #调用 akshare
-    #df = ak.stock_zh_a_hist(
-        #symbol=stock_code.split(".")[0],
-        #period=period,
-        #start_date=start_date,
-        #end_date=end_date,
-        #adjust="qfq"
-    #)
-
-
-
-    print("原始列名：",df.columns.tolist())
-    print("列数：",len(df.columns))
-
-    # 安全做法：只重命名需要的列，多余的不管
-    column_map = {
-        "日期": "日期",
-        "开盘": "开盘",
-        "收盘": "收盘",
-        "最高": "最高",
-        "最低": "最低",
-        "成交量": "成交量",
-        "成交额": "成交额",
-        "振幅": "振幅",
-        "涨跌幅": "涨跌幅",
-        "涨跌额": "涨跌额",
-        "换手率": "换手率"
-    }
-    #df = df.rename(columns=column_map)
+        return df
+    
+    # ✅ 本地没有，用 akshare 获取
+    print(f"🌐 从 akshare 获取: {stock_code}")
+    df = ak.stock_zh_a_hist(
+        symbol=stock_code.split(".")[0],
+        period=period,
+        start_date=start_date,
+        end_date=end_date,
+        adjust="qfq"
+    )
+    
+    # 标准化列名
+    df.columns = ["日期", "开盘", "收盘", "最高", "最低", "成交量", "成交额", 
+                  "振幅", "涨跌幅", "涨跌额", "换手率"]
+    
+    # 保存到本地（下次直接用缓存）
+    save_stock_data(df, stock_code.split('.')[0])
+    
     return df
 
 def save_stock_data(df:pd.DataFrame,stock_code:str,filepath:str=None):
