@@ -142,7 +142,8 @@ def backtest_agent_node(state: QuantAgentState) -> QuantAgentState:
         }
 
     except Exception as e:
-        print(f"❌ BacktestAgent 错误: {e}")
+        error_msg = f"BacktestAgent: {type(e).__name__}: {str(e)}"
+        print(f"❌ {error_msg}")
         import traceback
         traceback.print_exc()
         return {

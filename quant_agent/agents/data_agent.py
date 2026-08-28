@@ -79,6 +79,10 @@ def data_agent_node(state: QuantAgentState) -> QuantAgentState:
         }
     
     except Exception as e:
+        error_msg = f"DataAgent: {type(e).__name__}: {str(e)}"
+        print(f"❌ {error_msg}")
+        import traceback
+        traceback.print_exc()
         return {
             **state,
             "errors":state.get("errors", []) + [f"DataAgent: {str(e)}"],

@@ -145,7 +145,8 @@ class MACDStrategy(bt.Strategy):
         }
 
     except Exception as e:
-        print(f"❌ StrategyAgent 错误: {e}")
+        error_msg = f"StrategyAgent: {type(e).__name__}: {str(e)}"
+        print(f"❌ {error_msg}")
         import traceback
         traceback.print_exc()
         return {

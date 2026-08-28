@@ -27,6 +27,10 @@ def rag_agent_node(state: QuantAgentState) -> QuantAgentState:
         }
     
     except Exception as e:
+        error_msg = f"RAGAgent: {type(e).__name__}: {str(e)}"
+        print(f"❌ {error_msg}")
+        import traceback
+        traceback.print_exc()
         return {
             **state,
             "errors": state.get("errors", []) + [f"RAGAgent: {str(e)}"],
