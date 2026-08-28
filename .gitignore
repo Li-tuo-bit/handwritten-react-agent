@@ -34,7 +34,12 @@ data/000858_kline.csv
 chroma_db/
 models/
 __pycache__/
-"*.json" 
-"debug_*.py" 
-"chat.py" 
-"test_langgraph_hello.py" 
+
+# 运行时生成的数据和策略（保留目录，忽略内容）
+data/*.csv
+!data/.gitkeep
+strategies/*.py
+!strategies/.gitkeep
+
+# 日志
+*.log
