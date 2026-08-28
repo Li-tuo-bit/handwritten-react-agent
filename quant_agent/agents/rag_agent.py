@@ -3,6 +3,7 @@
 import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../tests'))
 
 from rag_tool import query_research_report
 from quant_agent.core.state import QuantAgentState

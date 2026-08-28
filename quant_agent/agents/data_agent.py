@@ -3,6 +3,7 @@
 import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../scripts'))
 
 import pandas as pd
 from data_fetcher import get_stock_kline
