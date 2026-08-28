@@ -1,0 +1,20 @@
+# 核心框架
+langgraph>=0.2.0
+langchain>=0.2.0
+langchain-openai>=0.1.0
+
+# 数据与回测
+akshare>=1.14.0
+pandas>=2.0.0
+backtrader>=1.9.78
+
+# RAG
+chromadb>=0.5.0
+sentence-transformers>=3.0.0
+
+# 工具
+numpy>=1.24.0
+python-dotenv>=1.0.0
+
+# 可视化
+matplotlib>=3.7.0

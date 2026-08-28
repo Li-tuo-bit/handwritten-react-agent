@@ -11,6 +11,7 @@
 | **📊 自动回测** | 策略代码动态加载（exec），Cerebro 引擎自动执行，输出收益率/夏普比率/最大回撤 |
 | **📚 研报 RAG** | 基于 ChromaDB + 本地嵌入模型，检索研报并生成投资摘要 |
 | **🎯 意图识别** | 自动识别用户意图，匹配最佳 Agent 组合（研究/回测/分析） |
+| **📝 手写 ReAct 实现** | Day 1 从零手写 200 行 ReAct Agent（见 `legacy/agent.py`），理解原理后再上框架 |
 
 ## 🏗️ 系统架构
 
@@ -50,29 +51,26 @@ Orchestrator（意图识别 + 执行计划编排）
 ## 📁 项目结构
 
 ```
-quant_agent/
-├── core/
-│   ├── state.py           # 全局 State 定义（TypedDict）
-│   ├── orchestrator.py    # 意图识别 + 执行计划编排
-│   └── graph_builder.py   # LangGraph 图构建
-├── agents/
-│   ├── data_agent.py      # 股票数据获取 + 指标计算
-│   ├── tech_agent.py      # 技术分析（MA/RSI/MACD 信号）
-│   ├── rag_agent.py       # 研报检索（ChromaDB RAG）
-│   ├── strategy_agent.py  # LLM 生成 Backtrader 策略代码
-│   └── backtest_agent.py  # 动态加载策略 + Cerebro 回测
-└── main.py                # 主入口
-
-strategies/                # 生成的策略代码
-├── 600519_strategy.py     # 贵州茅台-双均线策略
-└── 300750_strategy.py     # 宁德时代-双均线策略
-
-data/                      # 股票数据 CSV
-report_*.txt               # 生成的研究报告
+day01_handwritten_agent/
+├── quant_agent/           ← 核心多 Agent 系统
+│   ├── core/              # 状态定义、Orchestrator、图构建
+│   ├── agents/            # 5 个子 Agent 实现
+│   └── main.py            # 主入口
+├── scripts/               ← 独立工具脚本（数据获取、指标、回测、可视化）
+├── legacy/                ← 手写 Agent 历史代码（Day1 ReAct 实现，见 agent.py）
+├── tests/                 ← 测试与实验代码
+├── data/                  ← 股票数据 CSV
+├── reports/               ← 研报文本
+├── strategies/            ← 生成的策略代码
+└── docs/                  ← 文档与架构图
 ```
 
 ## 🚀 快速开始
 
+```bash
+# 克隆项目
+git clone <你的仓库地址>
+cd day01_handwritten_agent
 ### 1. 安装依赖
 
 ```bash
@@ -144,12 +142,16 @@ python test_day13.py
 | LLM 输出 markdown 代码块 | 模型习惯 | `strip()` + 去除 ` ```python ` 前缀 |
 | 回测数据列名不匹配 | CSV 中文列名 | `df.rename(columns={"日期": "datetime", ...})` |
 
-## 📌 项目状态
+## 📌 开发日志
 
-- ✅ Day 1-11：DataAgent / TechAgent / RAGAgent / Orchestrator
-- ✅ Day 12：StrategyAgent（LLM 策略生成）+ BacktestAgent（自动回测）
-- ✅ Day 13：3 个端到端案例联调通过，Bug 清零
-- 🔄 Day 14+：工程化（日志、异常处理、README、代码清理）
+- Day 1-2：手写 ReAct Agent + 工具扩展
+- Day 3-4：akshare 数据获取 + backtrader 回测
+- Day 5：端到端整合
+- Day 6：LangGraph 迁移
+- Day 7-9：RAG 基础 + ChromaDB + Memory
+- Day 10：多 Agent 架构设计
+- Day 11-13：5 个子 Agent 实现 + 联调测试
+- Day 14-15：工程化整理（代码结构、异常处理、README、Demo）
 
 ## 📄 License
 
